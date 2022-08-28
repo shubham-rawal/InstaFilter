@@ -10,8 +10,8 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 struct ContentView: View {
-    @State private var image : Image?
-    @State private var amount = 1.0
+    @State private var image: Image?
+    @State private var showingImagePicker = false
     
     var body: some View {
         VStack {
@@ -19,41 +19,12 @@ struct ContentView: View {
                 .resizable()
                 .scaledToFit()
             
-            
-            Slider(value: $amount, in: 0...10)
+            Button("Select Image") {
+                showingImagePicker = true
+            }
         }
-        .onAppear(perform: loadImage)
-    }
-    
-    func loadImage() {
-        guard let inputImage = UIImage(named: "SWAR") else { return }
-        let beginImage = CIImage(image: inputImage)
-        
-        let context = CIContext()
-        let currentFilter = CIFilter.pixellate()
-        currentFilter.inputImage = beginImage
-
-        
-        let inputKeys = currentFilter.inputKeys
-        
-        //changing the filter parameters dynamically
-        if inputKeys.contains(kCIInputIntensityKey) {
-            currentFilter.setValue(amount, forKey: kCIInputIntensityKey)
-        }
-        
-        if inputKeys.contains(kCIInputScaleKey) {
-            currentFilter.setValue(amount * 10, forKey: kCIInputScaleKey)
-        }
-        
-        if inputKeys.contains(kCIInputRadiusKey) {
-            currentFilter.setValue(amount * 100, forKey: kCIInputRadiusKey)
-        }
-        
-        guard let outputImage = currentFilter.outputImage else { return }
-        if let cgimg = context.createCGImage(outputImage, from: outputImage.extent) {
-            let uiImg = UIImage(cgImage: cgimg)
-            
-            image = Image(uiImage: uiImg)
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker()
         }
     }
 }
